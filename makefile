@@ -2,5 +2,5 @@ all:
 	javac -d ./bin *.java
 
 run:
-	cd bin && java Main.class && cd ..
+	cd bin && java ChatClient localhost 8000 && cd ..
 
