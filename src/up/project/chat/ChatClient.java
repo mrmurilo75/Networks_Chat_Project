@@ -1,3 +1,5 @@
+package up.project.chat;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -19,14 +21,14 @@ public class ChatClient {
 
 
 
-    
+
     // Método a usar para acrescentar uma string à caixa de texto
     // * NÃO MODIFICAR *
     public void printMessage(final String message) {
         chatArea.append(message);
     }
 
-    
+
     // Construtor
     public ChatClient(String server, int port) throws IOException {
 
@@ -77,7 +79,7 @@ public class ChatClient {
 
     }
 
-    
+
     // Método principal do objecto
     public void run() throws IOException {
         // PREENCHER AQUI
@@ -85,7 +87,7 @@ public class ChatClient {
 
 
     }
-    
+
 
     // Instancia o ChatClient e arranca-o invocando o seu método run()
     // * NÃO MODIFICAR *
