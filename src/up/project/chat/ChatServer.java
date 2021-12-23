@@ -12,10 +12,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 public class ChatServer
 {
@@ -193,17 +190,33 @@ public class ChatServer
             return false;
         }
 
-        // Decode and print the message to stdout
-        String message = decoder.decode(buffer).toString();
-        try {
-            clients.get(sc).getDataBuffer().append(message);
-        } catch (NullPointerException e ) {
+        ClientInfo cc = clients.get(sc);
+        if (cc == null)
             return false;
-        }
+
+        // Decode and pass the message to client processor
+        String message = decoder.decode(buffer).toString();
+        cc.getDataBuffer().append(message);
+        cc.process();
+
+        processCommands(cc);
 
         return true;
     }
 
+    private static void processCommands(ClientInfo cc) {
+        Queue<String> commands = cc.getCommandQueue();
+        for( String cmd : commands ) {
+
+            // TODO Logic for processing each command
+
+        }
+
+    }
+
+    private static void messageRoomAll(byte[] msg, String forum) {
+        messageRoomExcept(msg, forum, null);
+    }
 
     private static void messageRoomExcept(byte[] msg, String forum, ClientInfo exc) {
         for( ClientInfo member : foruns.get(forum) ) {
