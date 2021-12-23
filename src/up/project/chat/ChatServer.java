@@ -24,8 +24,8 @@ public class ChatServer
     static private final CharsetDecoder decoder = charset.newDecoder();
 
     static private final Hashtable<SocketChannel, ClientInfo> clients = new Hashtable<>();
-    static private final TreeMap<String, ClientInfo> nicks = new TreeMap<>();
-    static private final TreeMap<String, TreeSet<ClientInfo>> foruns = new TreeMap<>();
+    static private final Hashtable<String, ClientInfo> nicks = new Hashtable<>();
+    static private final Hashtable<String, TreeSet<ClientInfo>> foruns = new Hashtable<>();
 
     static public void main( String args[] ) throws Exception {
         // Parse port from command line
@@ -246,9 +246,9 @@ public class ChatServer
         ClientInfo cx = nicks.get(new_nick);
         if(cx != null) {
             if (!cx.equals(cc)) {
-                messageClient(("ERROR\n").getBytes(), cc);
+                commandError(cc);
             } else {
-                messageClient(("OK").getBytes(), cc);
+                commandComplete(cc);
             }
             return;
         }
@@ -259,12 +259,21 @@ public class ChatServer
         nicks.remove(old_nick);
         nicks.put(new_nick, cc);
         cc.setNick(new_nick);
-        messageClient( ("OK\n").getBytes(), cc);
 
         String forum = cc.getForum();
         if (forum != null) {
             messageRoomExcept( ("NEWNICK "+old_nick+" "+new_nick+"\n").getBytes(), forum, cc );
         }
+
+        commandComplete(cc);
+    }
+
+    private static void commandComplete(ClientInfo cc) {
+        messageClient(("OK").getBytes(), cc);
+    }
+
+    private static void commandError(ClientInfo cc) {
+        messageClient(("ERROR\n").getBytes(), cc);
     }
 
     private static void messageRoomAll(byte[] msg, String forum) {
