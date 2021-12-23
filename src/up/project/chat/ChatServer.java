@@ -321,7 +321,8 @@ public class ChatServer {
         // Nick is available
         //   give it to user and tell forum (if state inside)
         String old_nick = cc.getNick();
-        nicks.remove(old_nick);
+        if (old_nick != null)
+            nicks.remove(old_nick);
         nicks.put(new_nick, cc);
         cc.setNick(new_nick);
 
