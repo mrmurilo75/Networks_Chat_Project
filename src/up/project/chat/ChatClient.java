@@ -1,10 +1,12 @@
 package up.project.chat;
 
 import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.Socket;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 
@@ -14,13 +16,13 @@ public class ChatClient {
     JFrame frame = new JFrame("Chat Client");
     private JTextField chatBox = new JTextField();
     private JTextArea chatArea = new JTextArea();
-    // --- Fim das variáveis relacionadas coma interface gráfica
+    // --- Fim das variáveis relacionadas com a interface gráfica
 
     // Se for necessário adicionar variáveis ao objecto ChatClient, devem
     // ser colocadas aqui
 
-
-
+    static private BufferedWriter writeBuffer;
+    static private Socket s;
 
     // Método a usar para acrescentar uma string à caixa de texto
     // * NÃO MODIFICAR *
@@ -65,16 +67,21 @@ public class ChatClient {
         // Se for necessário adicionar código de inicialização ao
         // construtor, deve ser colocado aqui
 
-
-
+        s = new Socket(server, port);
+        writeBuffer = new BufferedWriter( new OutputStreamWriter(s.getOutputStream()) );
     }
 
 
     // Método invocado sempre que o utilizador insere uma mensagem
     // na caixa de entrada
     public void newMessage(String message) throws IOException {
-        // PREENCHER AQUI com código que envia a mensagem ao servidor
+        // Show in our client
+        printMessage(message + '\n');
 
+        // Send to server
+        writeBuffer.write(message);
+        writeBuffer.newLine();
+        writeBuffer.flush();
 
 
     }
