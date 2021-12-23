@@ -260,6 +260,11 @@ public class ChatServer {
 
     private static void sendPrivateMessage(String cmd, ClientInfo cc) {
         int separate = cmd.indexOf(' ');
+        if(separate == -1) {
+            commandError(cc);
+            return;
+        }
+
         String dest = cmd.substring(0, separate);
         String msg = cmd.substring(separate +1);
 
