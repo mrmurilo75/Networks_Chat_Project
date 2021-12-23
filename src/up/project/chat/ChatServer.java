@@ -234,6 +234,10 @@ public class ChatServer {
                 leaveChat(cc, key);
                 return;
             }
+            if (cmd.startsWith("/priv ")){
+                sendPrivateMessage(cmd.substring(6), cc);
+                continue;
+            }
             if (cmd.startsWith("//")) {
                 sendMessage(cmd.substring(1), cc);
                 continue;
@@ -252,6 +256,20 @@ public class ChatServer {
 
         }
 
+    }
+
+    private static void sendPrivateMessage(String cmd, ClientInfo cc) {
+        int separate = cmd.indexOf(' ');
+        String dest = cmd.substring(0, separate);
+        String msg = cmd.substring(separate +1);
+
+        ClientInfo cd = nicks.get(dest);
+        if (cd == null) {
+            commandError(cc);
+            return;
+        }
+        messageClient( ("PRIVATE "+cc.getNick()+" "+msg+"\n").getBytes(), cd);
+        commandComplete(cc);
     }
 
     private static void sendMessage(String cmd, ClientInfo cc) {
