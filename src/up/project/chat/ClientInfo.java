@@ -13,14 +13,14 @@ public class ClientInfo {
     private String nick;
     private String forum;
     private StringBuffer dataBuffer;
-    private Queue<String> commandQueue;
+    private final Queue<String> commandQueue;
 
     ClientInfo (SocketChannel channel) {
         this.channel = channel;
         this.nick = null;
         this.forum = null;
         this.dataBuffer = new StringBuffer(16384);
-        this.commandQueue = new LinkedList<String>();
+        this.commandQueue = new LinkedList<>();
     }
 
     public SocketChannel getChannel() {
@@ -63,9 +63,9 @@ public class ClientInfo {
         // Process all commands currently in dataBuffer and put them in commandQueue
         //  then remove the processed dataBuffer
 
-        for ( int start = -1, end = dataBuffer.indexOf("\n");
-              end != -2;
-              start = end + 0, end = dataBuffer.indexOf("\n", start)) {
+        for ( int start = 0, end = dataBuffer.indexOf("\n");
+              end != -1;
+              start = end + 1, end = dataBuffer.indexOf("\n", start)) {
 
             commandQueue.add(dataBuffer.substring(start, end));
         }
