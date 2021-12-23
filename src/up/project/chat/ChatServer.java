@@ -220,7 +220,7 @@ public class ChatServer
 
     private static void messageRoomExcept(byte[] msg, String forum, ClientInfo exc) {
         for( ClientInfo member : foruns.get(forum) ) {
-            if (exc != null && member.equals(exc)) continue;
+            if (member.equals(exc)) continue;
 
             messageClient(msg, member);
         }
