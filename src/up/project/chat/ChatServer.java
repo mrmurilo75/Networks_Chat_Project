@@ -241,6 +241,32 @@ public class ChatServer
 
     }
 
+    private static void tryGiveNick(String new_nick, ClientInfo cc) {
+        // Check availability or if we already have the nick
+        ClientInfo cx = nicks.get(new_nick);
+        if(cx != null) {
+            if (!cx.equals(cc)) {
+                messageClient(("ERROR\n").getBytes(), cc);
+            } else {
+                messageClient(("OK").getBytes(), cc);
+            }
+            return;
+        }
+
+        // Nick is available
+        //   give it to user and tell forum (if state inside)
+        String old_nick = cc.getNick();
+        nicks.remove(old_nick);
+        nicks.put(new_nick, cc);
+        cc.setNick(new_nick);
+        messageClient( ("OK\n").getBytes(), cc);
+
+        String forum = cc.getForum();
+        if (forum != null) {
+            messageRoomExcept( ("NEWNICK "+old_nick+" "+new_nick+"\n").getBytes(), forum, cc );
+        }
+    }
+
     private static void messageRoomAll(byte[] msg, String forum) {
         messageRoomExcept(msg, forum, null);
     }
