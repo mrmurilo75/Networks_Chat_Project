@@ -243,6 +243,17 @@ public class ChatServer
 
     }
 
+    private static void leaveForum(ClientInfo cc) {
+        String forum = cc.getForum();
+        if(forum == null){
+            commandError(cc);
+            return;
+        }
+
+        removeFromRoom(cc);
+        commandComplete(cc);
+    }
+
     private static void joinForum(String new_forum, ClientInfo cc) {
         if(cc.getNick() == null) {
             commandError(cc);
