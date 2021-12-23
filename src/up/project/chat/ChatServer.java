@@ -172,7 +172,7 @@ public class ChatServer
                 return;
             }
 
-            messageRoomExcept( ("LEFT "+cc.getNick()+"\n").getBytes(), forum, null);
+            messageRoomAll( ("LEFT "+cc.getNick()+"\n").getBytes(), forum);
 
         }
 
@@ -220,7 +220,7 @@ public class ChatServer
 
     private static void messageRoomExcept(byte[] msg, String forum, ClientInfo exc) {
         for( ClientInfo member : foruns.get(forum) ) {
-            if (member != null && member.equals(exc)) continue;
+            if (exc != null && member.equals(exc)) continue;
 
             messageClient(msg, member);
         }
