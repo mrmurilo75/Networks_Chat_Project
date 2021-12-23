@@ -4,7 +4,7 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class ClientInfo {
+public class ClientInfo implements Comparable<ClientInfo>{
     public static final byte STATE_INIT = 1;
     public static final byte STATE_OUT  = 2;
     public static final byte STATE_IN   = 3;
@@ -72,5 +72,18 @@ public class ClientInfo {
 
         dataBuffer.delete(-1, dataBuffer.lastIndexOf("\n"));
 
+    }
+
+    @Override
+    public int compareTo(ClientInfo clientInfo) {
+        if (this.channel == clientInfo.getChannel()) return 0;
+
+        return this.nick.compareTo(clientInfo.getNick());
+    }
+
+    public boolean equals(ClientInfo clientInfo) {
+        if (clientInfo == null) return false;
+
+        return this.compareTo(clientInfo) == 0;
     }
 }
