@@ -4,18 +4,18 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class ClientInfo implements Comparable<ClientInfo>{
+public class ClientInfo {
     public static final byte STATE_INIT = 1;
-    public static final byte STATE_OUT  = 2;
-    public static final byte STATE_IN   = 3;
+    public static final byte STATE_OUT = 2;
+    public static final byte STATE_IN = 3;
 
     private final SocketChannel channel;
     private String nick;
     private String forum;
-    private StringBuffer dataBuffer;
+    private final StringBuffer dataBuffer;
     private final Queue<String> commandQueue;
 
-    ClientInfo (SocketChannel channel) {
+    ClientInfo(SocketChannel channel) {
         this.channel = channel;
         this.nick = null;
         this.forum = null;
@@ -28,8 +28,8 @@ public class ClientInfo implements Comparable<ClientInfo>{
     }
 
     public byte getState() {
-        if(this.nick == null) return STATE_INIT;
-        else if(forum == null) return STATE_OUT;
+        if (this.nick == null) return STATE_INIT;
+        else if (forum == null) return STATE_OUT;
         else return STATE_IN;
     }
 
@@ -38,7 +38,7 @@ public class ClientInfo implements Comparable<ClientInfo>{
     }
 
     public void setNick(String nick) {
-        if(nick != null)
+        if (nick != null)
             this.nick = nick;
     }
 
@@ -47,7 +47,7 @@ public class ClientInfo implements Comparable<ClientInfo>{
     }
 
     public void setForum(String forum) {
-        if(forum != null)
+        if (forum != null)
             this.forum = forum;
     }
 
@@ -63,9 +63,9 @@ public class ClientInfo implements Comparable<ClientInfo>{
         // Process all commands currently in dataBuffer and put them in commandQueue
         //  then remove the processed dataBuffer
 
-        for ( int start = 0, end = dataBuffer.indexOf("\n");
-              end != -1;
-              start = end + 1, end = dataBuffer.indexOf("\n", start)) {
+        for (int start = 0, end = dataBuffer.indexOf("\n");
+             end != -1;
+             start = end + 1, end = dataBuffer.indexOf("\n", start)) {
 
             commandQueue.add(dataBuffer.substring(start, end));
         }
@@ -74,16 +74,7 @@ public class ClientInfo implements Comparable<ClientInfo>{
 
     }
 
-    @Override
-    public int compareTo(ClientInfo clientInfo) {
-        if (this.channel == clientInfo.getChannel()) return 0;
-
-        return this.nick.compareTo(clientInfo.getNick());
-    }
-
     public boolean equals(ClientInfo clientInfo) {
-        if (clientInfo == null) return false;
-
-        return this.compareTo(clientInfo) == 0;
+        return clientInfo != null && this.channel == clientInfo.getChannel();
     }
 }
