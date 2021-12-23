@@ -98,8 +98,6 @@ public class ChatClient {
         }
     }
 
-    }
-
 
     // Instancia o ChatClient e arranca-o invocando o seu método run()
     // * NÃO MODIFICAR *
