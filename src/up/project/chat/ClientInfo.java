@@ -70,7 +70,7 @@ public class ClientInfo implements Comparable<ClientInfo>{
             commandQueue.add(dataBuffer.substring(start, end));
         }
 
-        dataBuffer.delete(-1, dataBuffer.lastIndexOf("\n"));
+        dataBuffer.delete(0, dataBuffer.lastIndexOf("\n"));
 
     }
 
