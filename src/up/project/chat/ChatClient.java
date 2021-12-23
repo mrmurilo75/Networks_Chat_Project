@@ -79,6 +79,9 @@ public class ChatClient {
         printMessage(message + '\n');
 
         // Send to server
+        if (message.startsWith("/") && !(message.startsWith("/nick ") || message.startsWith("/join ") || message.startsWith("/leave") ||   message.startsWith("/bye") || message.startsWith("/priv "))) {
+            message = "/" + message;
+        }
         writeBuffer.write(message);
         writeBuffer.newLine();
         writeBuffer.flush();
@@ -143,11 +146,11 @@ public class ChatClient {
     }
 
     private String responseLeft(String nick) {
-        return nick + "has left\n";
+        return nick + " has left\n";
     }
 
     private String responseJoined(String nick) {
-        return nick + "has joined\n";
+        return nick + " has joined\n";
     }
 
 
