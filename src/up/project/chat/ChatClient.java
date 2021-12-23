@@ -91,10 +91,10 @@ public class ChatClient {
     public void run() throws IOException {
         BufferedReader readerBuffer = new BufferedReader( new InputStreamReader(s.getInputStream()) );
 
-        String message = null;
+        String response = null;
 
-        while ((message = readerBuffer.readLine()) != null && s.isConnected() ) {
-            printMessage(message);
+        while ((response = readerBuffer.readLine()) != null && s.isConnected() ) {
+            printMessage(response + "\n");
         }
     }
 
