@@ -25,7 +25,7 @@ public class ChatServer
 
     static private final Hashtable<SocketChannel, ClientInfo> clients = new Hashtable<>();
     static private final Hashtable<String, ClientInfo> nicks = new Hashtable<>();
-    static private final Hashtable<String, TreeSet<ClientInfo>> foruns = new Hashtable<>();
+    static private final Hashtable<String, HashSet<ClientInfo>> foruns = new Hashtable<>();
 
     static public void main( String args[] ) throws Exception {
         // Parse port from command line
@@ -163,7 +163,9 @@ public class ChatServer
         String forum = cc.getForum();
 
         if(forum != null) {
-            TreeSet<ClientInfo> members = foruns.get(forum);
+            cc.setForum(null);
+
+            HashSet<ClientInfo> members = foruns.get(forum);
 
             //Remove member and delete forum if it is empty
             if (members.remove(cc) && members.isEmpty()){
