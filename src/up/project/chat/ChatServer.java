@@ -1,11 +1,21 @@
 package up.project.chat;
 
-import java.io.*;
-import java.net.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.nio.charset.*;
-import java.util.*;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.util.Hashtable;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class ChatServer
 {
@@ -16,6 +26,9 @@ public class ChatServer
     static private final Charset charset = Charset.forName("UTF8");
     static private final CharsetDecoder decoder = charset.newDecoder();
 
+    static private final Hashtable<SocketChannel, ClientInfo> clients = new Hashtable<>();
+    static private final TreeMap<String, ClientInfo> nicks = new TreeMap<>();
+    static private final TreeMap<String, TreeSet<ClientInfo>> foruns = new TreeMap<>();
 
     static public void main( String args[] ) throws Exception {
         // Parse port from command line
@@ -55,10 +68,12 @@ public class ChatServer
                 // Get the keys corresponding to the activity that has been
                 // detected, and process them one by one
                 Set<SelectionKey> keys = selector.selectedKeys();
-                Iterator<SelectionKey> it = keys.iterator();
-                while (it.hasNext()) {
-                    // Get a key representing one of bits of I/O activity
-                    SelectionKey key = it.next();
+
+//                Iterator<SelectionKey> it = keys.iterator();
+//                while (it.hasNext()) {
+//                    SelectionKey key = it.next();
+                // Get a key representing one of bits of I/O activity
+                for (SelectionKey key : keys) {
 
                     // What kind of activity is it?
                     if (key.isAcceptable()) {
@@ -75,6 +90,9 @@ public class ChatServer
 
                         // Register it with the selector, for reading
                         sc.register( selector, SelectionKey.OP_READ );
+
+                        // Add to the client table
+                        clients.putIfAbsent(sc, new ClientInfo(sc));
 
                     } else if (key.isReadable()) {
 
@@ -96,6 +114,10 @@ public class ChatServer
                                     s = sc.socket();
                                     System.out.println( "Closing connection to "+s );
                                     s.close();
+
+                                    // Remove client from tables
+                                    deleteClient(sc);
+
                                 } catch( IOException ie ) {
                                     System.err.println( "Error closing socket "+s+": "+ie );
                                 }
@@ -124,6 +146,41 @@ public class ChatServer
     }
 
 
+    private static void deleteClient(SocketChannel sc) {
+        ClientInfo cc = clients.get(sc);
+        if (cc != null) {
+            switch (cc.getState()) {
+                case ClientInfo.STATE_IN:
+                    removeFromRoom(cc);
+
+                case ClientInfo.STATE_OUT:
+                    nicks.remove(cc.getNick());
+
+                default:
+                    clients.remove(sc);
+            }
+        }
+    }
+
+    private static void removeFromRoom(ClientInfo cc) {
+        String forum = cc.getForum();
+
+        if(forum != null) {
+            TreeSet<ClientInfo> members = foruns.get(forum);
+
+            //Remove member and delete forum if it is empty
+            if (members.remove(cc) && members.isEmpty()){
+                foruns.remove(forum);
+
+                return;
+            }
+
+            messageRoomExcept( ("LEFT "+cc.getNick()+"\n").getBytes(), forum, null);
+
+        }
+
+    }
+
     // Just read the message from the socket and send it to stdout
     static private boolean processInput( SocketChannel sc ) throws IOException {
         // Read the message to the buffer
@@ -138,8 +195,34 @@ public class ChatServer
 
         // Decode and print the message to stdout
         String message = decoder.decode(buffer).toString();
-        System.out.print( message );
+        processMessage( message );
 
         return true;
+    }
+
+    private static void processMessage(String message) {
+    }
+
+
+    private static void messageRoomExcept(byte[] msg, String forum, ClientInfo exc) {
+        for( ClientInfo member : foruns.get(forum) ) {
+            if (member != null && member.equals(exc)) continue;
+
+            messageClient(msg, member);
+        }
+    }
+
+    private static void messageClient(byte[] msg, ClientInfo cc) {
+        try {
+            buffer.clear();
+            buffer.put(msg);
+            buffer.flip();
+
+            cc.getChannel().write(buffer);
+
+        } catch (IOException e) {
+            System.err.println("Error sending message ( "+msg+" ) to "+cc.getNick()+" ( "+cc.getChannel()+" )");
+
+        }
     }
 }
