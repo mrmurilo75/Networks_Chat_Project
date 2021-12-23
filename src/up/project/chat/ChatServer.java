@@ -313,6 +313,12 @@ public class ChatServer {
     }
 
     private static void joinForum(String new_forum, ClientInfo cc) {
+        // Limit naming
+        if (ChatServer.isValidName(new_forum)){
+            commandError(cc);
+            return;
+        }
+
         if (cc.getNick() == null) {
             commandError(cc);
             return;
@@ -334,6 +340,12 @@ public class ChatServer {
     }
 
     private static void tryGiveNick(String new_nick, ClientInfo cc) {
+        // Limit naming
+        if (ChatServer.isValidName(new_nick)){
+            commandError(cc);
+            return;
+        }
+
         // Check availability or if we already have the nick
         ClientInfo cx = nicks.get(new_nick);
         if (cx != null) {
@@ -359,6 +371,10 @@ public class ChatServer {
         }
 
         commandComplete(cc);
+    }
+
+    private static boolean isValidName(String new_name) {
+        return !new_name.contains(" ");
     }
 
     private static void commandComplete(ClientInfo cc) {
