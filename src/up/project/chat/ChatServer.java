@@ -231,13 +231,15 @@ public class ChatServer
                 leaveChat(cc, key);
                 return;
             }
-
-            if(!cmd.startsWith("/") || cmd.startsWith("//")) {
-                messageRoomExcept(makeMessage(cmd), cc.getForum(), cc);
+            if(cmd.startsWith("//")) {
+                messageRoomAll( (cmd.substring(1)+"\n").getBytes(), cc.getForum());
                 continue;
             }
-
-            commandError(cc);
+            if(cmd.startsWith("/")) {
+                commandError(cc);
+                continue;
+            }
+            messageRoomAll( (cmd.substring(1)+"\n").getBytes(), cc.getForum());
 
         }
 
