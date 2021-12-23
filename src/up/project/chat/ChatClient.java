@@ -91,11 +91,63 @@ public class ChatClient {
     public void run() throws IOException {
         BufferedReader readerBuffer = new BufferedReader( new InputStreamReader(s.getInputStream()) );
 
-        String response = null;
+        String response;
 
         while ((response = readerBuffer.readLine()) != null && s.isConnected() ) {
-            printMessage(response + "\n");
+            printMessage(processResponse(response));
         }
+    }
+
+    private String processResponse(String response) {
+        if (response.startsWith("JOINED ")) {
+            return responseJoined(response.substring(7));
+        }
+        if (response.startsWith("LEFT ")) {
+            return responseLeft(response.substring(5));
+        }
+        if (response.startsWith("MESSAGE ")) {
+            return responseMessage(response.substring(8).split(" ", 2));
+        }
+        if (response.startsWith("NEWNICK ")) {
+            return responseNewnick(response.substring(8).split(" ", 2));
+        }
+        if (response.startsWith("PRIVATE ")) {
+            return responsePrivate(response.substring(8).split(" ", 2));
+        }
+
+        return response + "\n";
+    }
+
+    private String responsePrivate(String[] response) {
+        try {
+            return "(private) " + response[0] + ": " + response[1] + "\n";
+        } catch (IndexOutOfBoundsException e) {
+            return "(private) " + response[0] + ": \n";
+        }
+    }
+
+    private String responseNewnick(String[] response) {
+        try {
+            return response[0] + " has changed to " + response[1] + "\n";
+        } catch (IndexOutOfBoundsException e) {
+            return response[0] + " has changed to \n";
+        }
+    }
+
+    private String responseMessage(String[] response) {
+        try {
+            return response[0] + ": " + response[1] + "\n";
+        } catch (IndexOutOfBoundsException e) {
+            return response[0] + ": \n";
+        }
+    }
+
+    private String responseLeft(String nick) {
+        return nick + "has left\n";
+    }
+
+    private String responseJoined(String nick) {
+        return nick + "has joined\n";
     }
 
 
