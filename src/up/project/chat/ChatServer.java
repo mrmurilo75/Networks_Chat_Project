@@ -242,6 +242,12 @@ public class ChatServer {
                 commandError(cc);
                 continue;
             }
+
+            // Is a message
+            if (cc.getState() != ClientInfo.STATE_IN){
+                commandError(cc);
+                continue;
+            }
             messageRoomAll((cmd.substring(1) + "\n").getBytes(), cc.getForum());
 
         }
