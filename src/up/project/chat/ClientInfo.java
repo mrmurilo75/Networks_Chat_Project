@@ -3,9 +3,9 @@ package up.project.chat;
 import java.nio.channels.SocketChannel;
 
 public class ClientInfo {
-    private static final byte STATE_INIT = 1;
-    private static final byte STATE_OUT  = 2;
-    private static final byte STATE_IN   = 3;
+    public static final byte STATE_INIT = 1;
+    public static final byte STATE_OUT  = 2;
+    public static final byte STATE_IN   = 3;
 
     private final SocketChannel channel;
     private String nick;
