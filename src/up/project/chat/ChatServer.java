@@ -243,6 +243,26 @@ public class ChatServer
 
     }
 
+    private static void leaveChat(ClientInfo cc, SelectionKey key) {
+        messageClient( ("BYE\n").getBytes(), cc);
+
+        key.cancel();
+
+        Socket s = null;
+        SocketChannel sc = cc.getChannel();
+        try {
+            s = sc.socket();
+            System.out.println( "Closing connection to "+s );
+            s.close();
+
+            // Remove client from tables
+            deleteClient(sc);
+
+        } catch( IOException ie ) {
+            System.err.println( "Error closing socket "+s+": "+ie );
+        }
+    }
+
     private static void leaveForum(ClientInfo cc) {
         String forum = cc.getForum();
         if(forum == null){
