@@ -15,10 +15,9 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class ChatServer
-{
+public class ChatServer {
     // A pre-allocated buffer for the received data
-    static private final ByteBuffer buffer = ByteBuffer.allocate( 16384 );
+    static private final ByteBuffer buffer = ByteBuffer.allocate(16384);
 
     // Decoder for incoming text -- assume UTF-8
     static private final Charset charset = StandardCharsets.UTF_8;
@@ -31,28 +30,28 @@ public class ChatServer
     @SuppressWarnings({"InfiniteLoopStatement", "ThrowablePrintedToSystemOut"})
     static public void main(String[] args) {
         // Parse port from command line
-        int port = Integer.parseInt( args[0] );
+        int port = Integer.parseInt(args[0]);
 
         try {
             // Instead of creating a ServerSocket, create a ServerSocketChannel
             ServerSocketChannel ssc = ServerSocketChannel.open();
 
             // Set it to non-blocking, so we can use select
-            ssc.configureBlocking( false );
+            ssc.configureBlocking(false);
 
             // Get the Socket connected to this channel, and bind it to the
             // listening port
             ServerSocket ss = ssc.socket();
-            InetSocketAddress isa = new InetSocketAddress( port );
-            ss.bind( isa );
+            InetSocketAddress isa = new InetSocketAddress(port);
+            ss.bind(isa);
 
             // Create a new Selector for selecting
             Selector selector = Selector.open();
 
             // Register the ServerSocketChannel, so we can listen for incoming
             // connections
-            ssc.register( selector, SelectionKey.OP_ACCEPT );
-            System.out.println( "Listening on port "+port );
+            ssc.register(selector, SelectionKey.OP_ACCEPT);
+            System.out.println("Listening on port " + port);
 
             while (true) {
                 // See if we've had any activity -- either an incoming connection,
@@ -80,15 +79,15 @@ public class ChatServer
                         // It's an incoming connection.  Register this socket with
                         // the Selector so we can listen for input on it
                         Socket s = ss.accept();
-                        System.out.println( "Got connection from "+s );
+                        System.out.println("Got connection from " + s);
 
                         // Make sure to make it non-blocking, so we can use a selector
                         // on it.
                         SocketChannel sc = s.getChannel();
-                        sc.configureBlocking( false );
+                        sc.configureBlocking(false);
 
                         // Register it with the selector, for reading
-                        sc.register( selector, SelectionKey.OP_READ );
+                        sc.register(selector, SelectionKey.OP_READ);
 
                         // Add to the client table
                         clients.putIfAbsent(sc, new ClientInfo(sc));
@@ -100,8 +99,8 @@ public class ChatServer
                         try {
 
                             // It's incoming data on a connection -- process it
-                            sc = (SocketChannel)key.channel();
-                            boolean ok = processInput( sc, key );
+                            sc = (SocketChannel) key.channel();
+                            boolean ok = processInput(sc, key);
 
                             // If the connection is dead, remove it from the selector
                             // and close it
@@ -111,27 +110,29 @@ public class ChatServer
                                 Socket s = null;
                                 try {
                                     s = sc.socket();
-                                    System.out.println( "Closing connection to "+s );
+                                    System.out.println("Closing connection to " + s);
                                     s.close();
 
                                     // Remove client from tables
                                     deleteClient(sc);
 
-                                } catch( IOException ie ) {
-                                    System.err.println( "Error closing socket "+s+": "+ie );
+                                } catch (IOException ie) {
+                                    System.err.println("Error closing socket " + s + ": " + ie);
                                 }
                             }
 
-                        } catch( IOException ie ) {
+                        } catch (IOException ie) {
 
                             // On exception, remove this channel from the selector
                             key.cancel();
 
                             try {
                                 sc.close();
-                            } catch( IOException ie2 ) { System.out.println( ie2 ); }
+                            } catch (IOException ie2) {
+                                System.out.println(ie2);
+                            }
 
-                            System.out.println( "Closed "+sc );
+                            System.out.println("Closed " + sc);
                         }
                     }
                 }
@@ -139,8 +140,8 @@ public class ChatServer
                 // We remove the selected keys, because we've dealt with them.
                 keys.clear();
             }
-        } catch( IOException ie ) {
-            System.err.println( ie );
+        } catch (IOException ie) {
+            System.err.println(ie);
         }
     }
 
@@ -164,33 +165,33 @@ public class ChatServer
     private static void removeFromRoom(ClientInfo cc) {
         String forum = cc.getForum();
 
-        if(forum != null) {
+        if (forum != null) {
             cc.setForum(null);
 
             HashSet<ClientInfo> members = foruns.get(forum);
 
             //Remove member and delete forum if it is empty
-            if (members.remove(cc) && members.isEmpty()){
+            if (members.remove(cc) && members.isEmpty()) {
                 foruns.remove(forum);
 
                 return;
             }
 
-            messageRoomAll( ("LEFT "+cc.getNick()+"\n").getBytes(), forum);
+            messageRoomAll(("LEFT " + cc.getNick() + "\n").getBytes(), forum);
 
         }
 
     }
 
     // Just read the message from the socket and send it to stdout
-    static private boolean processInput( SocketChannel sc, SelectionKey key ) throws IOException {
+    static private boolean processInput(SocketChannel sc, SelectionKey key) throws IOException {
         // Read the message to the buffer
         buffer.clear();
-        sc.read( buffer );
+        sc.read(buffer);
         buffer.flip();
 
         // If no data, close the connection
-        if (buffer.limit()==0) {
+        if (buffer.limit() == 0) {
             return false;
         }
 
@@ -210,45 +211,45 @@ public class ChatServer
 
     private static void processCommands(ClientInfo cc, SelectionKey key) {
         Queue<String> commands = cc.getCommandQueue();
-        while(! commands.isEmpty()) {
+        while (!commands.isEmpty()) {
             String cmd = commands.poll();
 
-            if(cmd.length() == 0) {
+            if (cmd.length() == 0) {
                 continue;
             }
 
-            if(cmd.startsWith("/nick ")){
+            if (cmd.startsWith("/nick ")) {
                 tryGiveNick(cmd.substring(6), cc);
                 continue;
             }
-            if(cmd.startsWith("/join ")) {
+            if (cmd.startsWith("/join ")) {
                 joinForum(cmd.substring(6), cc);
                 continue;
             }
-            if(cmd.startsWith("/leave")) {
+            if (cmd.startsWith("/leave")) {
                 leaveForum(cc);
                 continue;
             }
-            if(cmd.startsWith("/bye")) {
+            if (cmd.startsWith("/bye")) {
                 leaveChat(cc, key);
                 return;
             }
-            if(cmd.startsWith("//")) {
-                messageRoomAll( (cmd.substring(1)+"\n").getBytes(), cc.getForum());
+            if (cmd.startsWith("//")) {
+                messageRoomAll((cmd.substring(1) + "\n").getBytes(), cc.getForum());
                 continue;
             }
-            if(cmd.startsWith("/")) {
+            if (cmd.startsWith("/")) {
                 commandError(cc);
                 continue;
             }
-            messageRoomAll( (cmd.substring(1)+"\n").getBytes(), cc.getForum());
+            messageRoomAll((cmd.substring(1) + "\n").getBytes(), cc.getForum());
 
         }
 
     }
 
     private static void leaveChat(ClientInfo cc, SelectionKey key) {
-        messageClient( ("BYE\n").getBytes(), cc);
+        messageClient(("BYE\n").getBytes(), cc);
 
         key.cancel();
 
@@ -256,20 +257,20 @@ public class ChatServer
         SocketChannel sc = cc.getChannel();
         try {
             s = sc.socket();
-            System.out.println( "Closing connection to "+s );
+            System.out.println("Closing connection to " + s);
             s.close();
 
             // Remove client from tables
             deleteClient(sc);
 
-        } catch( IOException ie ) {
-            System.err.println( "Error closing socket "+s+": "+ie );
+        } catch (IOException ie) {
+            System.err.println("Error closing socket " + s + ": " + ie);
         }
     }
 
     private static void leaveForum(ClientInfo cc) {
         String forum = cc.getForum();
-        if(forum == null){
+        if (forum == null) {
             commandError(cc);
             return;
         }
@@ -279,7 +280,7 @@ public class ChatServer
     }
 
     private static void joinForum(String new_forum, ClientInfo cc) {
-        if(cc.getNick() == null) {
+        if (cc.getNick() == null) {
             commandError(cc);
             return;
         }
@@ -287,10 +288,10 @@ public class ChatServer
         removeFromRoom(cc);
 
         HashSet<ClientInfo> memebers = foruns.get(new_forum);
-        if(memebers == null) {
+        if (memebers == null) {
             foruns.put(new_forum, new HashSet<>());
         } else {
-            messageRoomAll( ("JOINED "+cc.getNick()+"\n").getBytes(), new_forum);
+            messageRoomAll(("JOINED " + cc.getNick() + "\n").getBytes(), new_forum);
         }
 
         foruns.get(new_forum).add(cc);
@@ -302,7 +303,7 @@ public class ChatServer
     private static void tryGiveNick(String new_nick, ClientInfo cc) {
         // Check availability or if we already have the nick
         ClientInfo cx = nicks.get(new_nick);
-        if(cx != null) {
+        if (cx != null) {
             if (!cx.equals(cc)) {
                 commandError(cc);
             } else {
@@ -320,7 +321,7 @@ public class ChatServer
 
         String forum = cc.getForum();
         if (forum != null) {
-            messageRoomExcept( ("NEWNICK "+old_nick+" "+new_nick+"\n").getBytes(), forum, cc );
+            messageRoomExcept(("NEWNICK " + old_nick + " " + new_nick + "\n").getBytes(), forum, cc);
         }
 
         commandComplete(cc);
@@ -339,7 +340,7 @@ public class ChatServer
     }
 
     private static void messageRoomExcept(byte[] msg, String forum, ClientInfo exc) {
-        for( ClientInfo member : foruns.get(forum) ) {
+        for (ClientInfo member : foruns.get(forum)) {
             if (member.equals(exc)) continue;
 
             messageClient(msg, member);
@@ -355,7 +356,7 @@ public class ChatServer
             cc.getChannel().write(buffer);
 
         } catch (IOException e) {
-            System.err.println("Error sending message ( "+ Arrays.toString(msg) +" ) to "+cc.getNick()+" ( "+cc.getChannel()+" )");
+            System.err.println("Error sending message ( " + Arrays.toString(msg) + " ) to " + cc.getNick() + " ( " + cc.getChannel() + " )");
 
         }
     }
