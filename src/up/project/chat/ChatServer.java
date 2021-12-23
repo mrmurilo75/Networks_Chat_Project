@@ -12,6 +12,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ChatServer
@@ -20,14 +21,15 @@ public class ChatServer
     static private final ByteBuffer buffer = ByteBuffer.allocate( 16384 );
 
     // Decoder for incoming text -- assume UTF-8
-    static private final Charset charset = Charset.forName("UTF8");
+    static private final Charset charset = StandardCharsets.UTF_8;
     static private final CharsetDecoder decoder = charset.newDecoder();
 
     static private final Hashtable<SocketChannel, ClientInfo> clients = new Hashtable<>();
     static private final Hashtable<String, ClientInfo> nicks = new Hashtable<>();
     static private final Hashtable<String, HashSet<ClientInfo>> foruns = new Hashtable<>();
 
-    static public void main( String args[] ) throws Exception {
+    @SuppressWarnings({"InfiniteLoopStatement", "ThrowablePrintedToSystemOut"})
+    static public void main(String[] args) {
         // Parse port from command line
         int port = Integer.parseInt( args[0] );
 
@@ -284,7 +286,7 @@ public class ChatServer
 
         removeFromRoom(cc);
 
-        HashSet<> memebers = foruns.get(new_forum);
+        HashSet<ClientInfo> memebers = foruns.get(new_forum);
         if(memebers == null) {
             foruns.put(new_forum, new HashSet<>());
         } else {
@@ -353,7 +355,7 @@ public class ChatServer
             cc.getChannel().write(buffer);
 
         } catch (IOException e) {
-            System.err.println("Error sending message ( "+msg+" ) to "+cc.getNick()+" ( "+cc.getChannel()+" )");
+            System.err.println("Error sending message ( "+ Arrays.toString(msg) +" ) to "+cc.getNick()+" ( "+cc.getChannel()+" )");
 
         }
     }
