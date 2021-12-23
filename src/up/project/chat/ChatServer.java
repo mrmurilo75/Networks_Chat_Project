@@ -195,12 +195,13 @@ public class ChatServer
 
         // Decode and print the message to stdout
         String message = decoder.decode(buffer).toString();
-        processMessage( message );
+        try {
+            clients.get(sc).getDataBuffer().append(message);
+        } catch (NullPointerException e ) {
+            return false;
+        }
 
         return true;
-    }
-
-    private static void processMessage(String message) {
     }
 
 

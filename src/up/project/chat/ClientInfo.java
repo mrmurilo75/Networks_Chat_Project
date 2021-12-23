@@ -10,11 +10,13 @@ public class ClientInfo {
     private final SocketChannel channel;
     private String nick;
     private String forum;
+    private StringBuffer dataBuffer;
 
     ClientInfo (SocketChannel channel) {
         this.channel = channel;
         this.nick = null;
         this.forum = null;
+        this.dataBuffer = new StringBuffer(16384);
     }
 
     public SocketChannel getChannel() {
@@ -43,5 +45,9 @@ public class ClientInfo {
     public void setForum(String forum) {
         if(forum != null)
             this.forum = forum;
+    }
+
+    public StringBuffer getDataBuffer() {
+        return dataBuffer;
     }
 }
