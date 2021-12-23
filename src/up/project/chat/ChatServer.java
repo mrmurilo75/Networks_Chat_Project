@@ -241,6 +241,27 @@ public class ChatServer
 
     }
 
+    private static void joinForum(String new_forum, ClientInfo cc) {
+        if(cc.getNick() == null) {
+            commandError(cc);
+            return;
+        }
+
+        removeFromRoom(cc);
+
+        HashSet<> memebers = foruns.get(new_forum);
+        if(memebers == null) {
+            foruns.put(new_forum, new HashSet<>());
+        } else {
+            messageRoomAll( ("JOINED "+cc.getNick()+"\n").getBytes(), new_forum);
+        }
+
+        foruns.get(new_forum).add(cc);
+        cc.setForum(new_forum);
+
+        commandComplete(cc);
+    }
+
     private static void tryGiveNick(String new_nick, ClientInfo cc) {
         // Check availability or if we already have the nick
         ClientInfo cx = nicks.get(new_nick);
