@@ -375,6 +375,9 @@ public class ChatServer {
 
     private static boolean isValidName(String new_name) {
         return !new_name.contains(" ");
+
+        // TODO change from simple validating to a cleanup ann validation
+        //  it is currently ERRORing '/join room ' bc of ending space...
     }
 
     private static void commandComplete(ClientInfo cc) {
