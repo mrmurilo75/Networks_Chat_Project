@@ -89,9 +89,14 @@ public class ChatClient {
 
     // Método principal do objecto
     public void run() throws IOException {
-        // PREENCHER AQUI
+        BufferedReader readerBuffer = new BufferedReader( new InputStreamReader(s.getInputStream()) );
 
+        String message = null;
 
+        while ((message = readerBuffer.readLine()) != null && s.isConnected() ) {
+            printMessage(message);
+        }
+    }
 
     }
 
