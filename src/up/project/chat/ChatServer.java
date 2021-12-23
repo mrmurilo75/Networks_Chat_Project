@@ -235,7 +235,7 @@ public class ChatServer {
                 return;
             }
             if (cmd.startsWith("//")) {
-                messageRoomAll(("MESSAGE " + cmd.substring(1) + "\n").getBytes(), cc.getForum());
+                sendMessage(cmd.substring(1), cc);
                 continue;
             }
             if (cmd.startsWith("/")) {
@@ -248,10 +248,14 @@ public class ChatServer {
                 commandError(cc);
                 continue;
             }
-            messageRoomAll(("MESSAGE " + cmd + "\n").getBytes(), cc.getForum());
+            sendMessage(cmd, cc);
 
         }
 
+    }
+
+    private static void sendMessage(String cmd, ClientInfo cc) {
+        messageRoomAll(("MESSAGE " + cc.getNick() + " " + cmd + "\n").getBytes(), cc.getForum());
     }
 
     private static void leaveChat(ClientInfo cc, SelectionKey key) {
