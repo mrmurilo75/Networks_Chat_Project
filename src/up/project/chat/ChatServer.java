@@ -335,7 +335,7 @@ public class ChatServer {
     }
 
     private static void commandComplete(ClientInfo cc) {
-        messageClient(("OK").getBytes(), cc);
+        messageClient(("OK\n").getBytes(), cc);
     }
 
     private static void commandError(ClientInfo cc) {
