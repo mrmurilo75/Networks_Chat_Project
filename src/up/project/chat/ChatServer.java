@@ -206,9 +206,36 @@ public class ChatServer
 
     private static void processCommands(ClientInfo cc) {
         Queue<String> commands = cc.getCommandQueue();
-        for( String cmd : commands ) {
+        while(! commands.isEmpty()) {
+            String cmd = commands.poll();
 
-            // TODO Logic for processing each command
+            if(cmd.length() == 0) {
+                continue;
+            }
+
+            if(cmd.startsWith("/nick ")){
+                tryGiveNick(cmd.substring(6), cc);
+                continue;
+            }
+            if(cmd.startsWith("/join ")) {
+                joinForum(cmd.substring(6), cc);
+                continue;
+            }
+            if(cmd.startsWith("/leave")) {
+                leaveForum(cc);
+                continue;
+            }
+            if(cmd.startsWith("/bye")) {
+                leaveChat(cc);
+                return;
+            }
+
+            if(!cmd.startsWith("/") || cmd.startsWith("//")) {
+                messageRoomExcept(makeMessage(cmd), cc.getForum(), cc);
+                continue;
+            }
+
+            commandError(cc);
 
         }
 
