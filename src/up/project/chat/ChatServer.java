@@ -99,7 +99,7 @@ public class ChatServer
 
                             // It's incoming data on a connection -- process it
                             sc = (SocketChannel)key.channel();
-                            boolean ok = processInput( sc );
+                            boolean ok = processInput( sc, key );
 
                             // If the connection is dead, remove it from the selector
                             // and close it
@@ -181,7 +181,7 @@ public class ChatServer
     }
 
     // Just read the message from the socket and send it to stdout
-    static private boolean processInput( SocketChannel sc ) throws IOException {
+    static private boolean processInput( SocketChannel sc, SelectionKey key ) throws IOException {
         // Read the message to the buffer
         buffer.clear();
         sc.read( buffer );
@@ -201,12 +201,12 @@ public class ChatServer
         cc.getDataBuffer().append(message);
         cc.process();
 
-        processCommands(cc);
+        processCommands(cc, key);
 
         return true;
     }
 
-    private static void processCommands(ClientInfo cc) {
+    private static void processCommands(ClientInfo cc, SelectionKey key) {
         Queue<String> commands = cc.getCommandQueue();
         while(! commands.isEmpty()) {
             String cmd = commands.poll();
@@ -228,7 +228,7 @@ public class ChatServer
                 continue;
             }
             if(cmd.startsWith("/bye")) {
-                leaveChat(cc);
+                leaveChat(cc, key);
                 return;
             }
 
