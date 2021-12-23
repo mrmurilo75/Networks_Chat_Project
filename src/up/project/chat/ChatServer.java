@@ -235,7 +235,7 @@ public class ChatServer {
                 return;
             }
             if (cmd.startsWith("//")) {
-                messageRoomAll((cmd.substring(1) + "\n").getBytes(), cc.getForum());
+                messageRoomAll(("MESSAGE " + cmd.substring(1) + "\n").getBytes(), cc.getForum());
                 continue;
             }
             if (cmd.startsWith("/")) {
@@ -244,11 +244,11 @@ public class ChatServer {
             }
 
             // Is a message
-            if (cc.getState() != ClientInfo.STATE_IN){
+            if (cc.getState() != ClientInfo.STATE_IN) {
                 commandError(cc);
                 continue;
             }
-            messageRoomAll((cmd.substring(1) + "\n").getBytes(), cc.getForum());
+            messageRoomAll(("MESSAGE " + cmd + "\n").getBytes(), cc.getForum());
 
         }
 
