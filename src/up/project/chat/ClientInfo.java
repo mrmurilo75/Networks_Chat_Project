@@ -63,14 +63,19 @@ public class ClientInfo {
         // Process all commands currently in dataBuffer and put them in commandQueue
         //  then remove the processed dataBuffer
 
-        for (int start = 0, end = dataBuffer.indexOf("\n");
-             end != -1;
-             start = end + 1, end = dataBuffer.indexOf("\n", start)) {
-
+        int start = 0, end = dataBuffer.indexOf("\n"), prev_end = end;
+        while( end != -1) {
             commandQueue.add(dataBuffer.substring(start, end));
+
+            start = end + 1;
+            prev_end = end;
+            end = dataBuffer.indexOf("\n", start);
         }
 
-        dataBuffer.delete(0, dataBuffer.lastIndexOf("\n"));
+        if(end != -1)
+            dataBuffer.delete(0, end);
+        else if(prev_end != -1)
+            dataBuffer.delete(0, prev_end);
 
     }
 
